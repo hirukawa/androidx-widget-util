@@ -1,17 +1,15 @@
 buildscript {
 	repositories {
 		google()
-		jcenter()
+		mavenCentral()
 	}
 	dependencies {
 		classpath "com.android.tools.build:gradle:4.0.1"
 	}
 }
-plugins {
-	id "com.jfrog.bintray" version "1.8.1"
-}
-apply plugin : 'maven-publish'
+
 apply plugin: 'com.android.library'
+apply plugin: 'maven-publish'
 
 android {
 	compileSdkVersion 30
@@ -47,16 +45,13 @@ gradle.projectsEvaluated {
 	}
 }
 
-archivesBaseName = 'androidx-widget-util'
-version = '0.1'
-
 repositories {
 	google()
-	jcenter()
+	mavenCentral()
 }
 
 dependencies {
-	implementation "androidx.recyclerview:recyclerview:1.1.0"
+	implementation "androidx.recyclerview:recyclerview:1.2.1"
 }
 
 defaultTasks 'clean', 'build'
@@ -97,35 +92,23 @@ task sourcesJar(type: Jar) {
 	from android.sourceSets.main.java.srcDirs
 }
 
-artifacts {
-	archives sourcesJar
-	archives javadocJar
-}
-
-bintrayUpload.dependsOn('build', 'javadocJar', 'sourcesJar', 'generatePomFileForMavenJavaPublication')
+// publishing -> publishReleasePublicationToMavenRepository
 afterEvaluate {
 	publishing {
 		publications {
-			mavenJava(MavenPublication) {
+			release(MavenPublication) {
 				groupId 'onl.oss.androidx'
-				artifactId 'widget-util'
+				artifactId = "widget-util"
+				version '0.1.1'
 				from components.release
 				artifact sourcesJar
 				artifact javadocJar
 			}
 		}
-	}
-}
-bintray {
-	user = System.getenv('BINTRAY_USER')
-	key  = System.getenv('BINTRAY_KEY')
-
-	publications = ['mavenJava']
-
-	pkg {
-		repo = 'maven'
-		name = 'androidx-widget-util'
-		licenses = ['MIT']
-		vcsUrl = 'https://github.com/hirukawa/androidx-widget-util'
+		repositories {
+			maven {
+				url "$buildDir/maven"
+			}
+		}
 	}
 }
